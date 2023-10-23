@@ -13,4 +13,4 @@ News: We have added the code for rendering the dataset (23.10.2023)
 
 ## Dataset Generation
 
-To render the FunnyBirds dataset, please refer to the [render folder](https://github.com/visinf/funnybirds/tree/main/render)
+To render the FunnyBirds dataset, please refer to the [render folder](https://github.com/visinf/funnybirds/tree/main/render).
