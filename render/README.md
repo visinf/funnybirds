@@ -15,7 +15,7 @@ You can test if the server is properly running in your own browser by pasting th
 http://localhost:8081/page?render_mode=default&camera_distance=700&camera_pitch=6.28&camera_roll=1.0&light_distance=300&light_pitch=6.0&light_roll=0.0&beak_model=beak04.glb&beak_color=yellow&foot_model=foot01.glb&eye_model=eye02.glb&tail_model=tail01.glb&tail_color=red&wing_model=wing02.glb&wing_color=green&bg_objects=1,2,3&bg_scale_x=20,2,3&bg_scale_y=20,2,100&bg_scale_z=20,2,100&bg_rot_x=20,2,3&bg_rot_y=1,5,100&bg_rot_z=1,2,100&bg_color=red,green,blue&bg_radius=100,150,200&bg_pitch=0,1,2&bg_roll=0.5,1.5,2.5
 ```
 
-![Preview of rendered FunnyBird](http://url/to/img.png)
+![Preview of rendered FunnyBird](https://github.com/visinf/funnybirds/blob/main/render/funnybirds_render.png)
 
 _You can even turn the scene with a left-click and by moving the cursor._
 
