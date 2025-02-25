@@ -1,0 +1,1 @@
+from .funny_birds import FunnyBirds
