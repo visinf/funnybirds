@@ -5,16 +5,17 @@
 import argparse
 import random
 import torch
-from captum.attr import IntegratedGradients, LayerGradCam, InputXGradient, Saliency
+from captum.attr import IntegratedGradients, LayerGradCam, InputXGradient, Saliency, GuidedGradCam, GuidedBackprop, DeepLift
 
 from models.resnet import resnet50
 from models.vgg import vgg16
 from models.ViT.ViT_new import vit_base_patch16_224
 from models.ViT.ViT_LRP import vit_base_patch16_224 as vit_LRP
+from models.protopnet.ppnet import ppnetexplain
 
 from models.model_wrapper import StandardModel, ViTModel, BcosModel, ProtoPNetModel
 from evaluation_protocols import accuracy_protocol, controlled_synthetic_data_check_protocol, single_deletion_protocol, preservation_check_protocol, deletion_check_protocol, target_sensitivity_protocol, distractibility_protocol, background_independence_protocol
-from explainers.explainer_wrapper import CaptumAttributionExplainer, BcosExplainer, ProtoPNetExplainer, RiseExplainer, LimeExplainer, BagNetExplainer, ViTGradCamExplainer, ViTRolloutExplainer, ViTCheferLRPExplainer, IntegratedGradientsAbsoluteExplainer
+from explainers.explainer_wrapper import CaptumAttributionExplainer, BcosExplainer, ProtoPNetExplainer, RiseExplainer, LimeExplainer, BagNetExplainer, ViTGradCamExplainer, ViTRolloutExplainer, ViTCheferLRPExplainer, IntegratedGradientsAbsoluteExplainer, SSMExplainer, SSMAttriblikePExplainer
 from models.bcos.model import get_model
 from models.bcos.experiment_parameters import exps
 from models.bcos.bcosconv2d import BcosConv2d
@@ -32,7 +33,7 @@ parser.add_argument('--model', required=True,
                     choices=['resnet50', 'vgg16', 'bcos_resnet50', 'bagnet33', 'x_resnet50', 'protopnet_resnet50', 'vit_b_16'],
                     help='model architecture')
 parser.add_argument('--explainer', required=True,
-                    choices=['IntegratedGradients', 'InputXGradient', 'Saliency', 'Rise', 'Lime', 'Bcos', 'BagNet', 'GradCam', 'ProtoPNet', 'Rollout', 'CheferLRP', 'IntegratedGradientsAbsolute'],
+                    choices=['IntegratedGradients', 'InputXGradient', 'Saliency', 'Rise', 'Lime', 'Bcos', 'BagNet', 'GradCam', 'ProtoPNet', 'Rollout', 'CheferLRP', 'IntegratedGradientsAbsolute', 'SSMExplainer', 'SSMAttriblikePExplainer', 'GuidedGradCam', 'GuidedBackprop', 'DeepLift'],
                     help='explainer')
 parser.add_argument('--checkpoint_name', type=str, required=True, default=None,
                     help='checkpoint name (including dir)')
@@ -108,7 +109,7 @@ def main():
         num_classes = 50
         prototype_activation_function = 'log' 
         add_on_layers_type = 'regular'
-        load_model_dir = '/path/to/model_weights/FunnyBirds/protopnet/saved_models/resnet50/007'
+        load_model_dir = '/data/vimb12/model_weights/FunnyBirds/protopnet/saved_models/resnet50/007'
         epoch_number_str = '60'
         print('REMEMBER TO ADJUST PROTOPNET PATH AND EPOCH')
         model = model_ppnet.construct_PPNet(base_architecture=base_architecture,
@@ -170,6 +171,29 @@ def main():
         explainer = ViTRolloutExplainer(model)
     elif args.explainer == 'CheferLRP':
         explainer = ViTCheferLRPExplainer(model)
+    elif args.explainer == 'SSMExplainer':
+        explainer = ppnetexplain(model)
+        explainer = SSMExplainer(explainer)
+    elif args.explainer == 'SSMAttriblikePExplainer':
+        explainer = ppnetexplain(model)
+        explainer = SSMAttriblikePExplainer(explainer)
+    elif args.explainer == 'GuidedGradCam':
+        if args.model == 'resnet50':
+            explainer = GuidedGradCam(model, model.model.layer4)
+            explainer = CaptumAttributionExplainer(explainer)
+        elif args.model == 'vgg16':
+            explainer = GuidedGradCam(model, model.model.features)
+            explainer = CaptumAttributionExplainer(explainer)
+        else:
+            print('GuidedGradCAM not supported for model!')
+            return
+
+    elif args.explainer == 'GuidedBackprop':
+        explainer = GuidedBackprop(model)
+        explainer = CaptumAttributionExplainer(explainer)
+    elif args.explainer == 'DeepLift':
+        explainer = DeepLift(model)
+        explainer = CaptumAttributionExplainer(explainer)
     else:
         print('Explainer not implemented')
 
