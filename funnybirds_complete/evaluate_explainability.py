@@ -109,7 +109,7 @@ def main():
         num_classes = 50
         prototype_activation_function = 'log' 
         add_on_layers_type = 'regular'
-        load_model_dir = '/data/vimb12/model_weights/FunnyBirds/protopnet/saved_models/resnet50/007'
+        load_model_dir = '/path/to/model_weights/FunnyBirds/protopnet/saved_models/resnet50/007'
         epoch_number_str = '60'
         print('REMEMBER TO ADJUST PROTOPNET PATH AND EPOCH')
         model = model_ppnet.construct_PPNet(base_architecture=base_architecture,
