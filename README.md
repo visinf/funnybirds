@@ -13,6 +13,7 @@ News:
 - The [FunnyBirds framework repository](https://github.com/visinf/funnybirds-framework) is ready to evaluate your own methods (September 13, 2023)
 - You can now render the dataset yourself (October 23, 2023)
 - We have added the code for the custom evaluations (February 14, 2024)
+- We have added further explanation methods. If you only want to have a look at the methods presented in the paper, you can go to the "paper" branch for a slightly more compact version of the code (March 25, 2025)
 
 ## Getting Started
 

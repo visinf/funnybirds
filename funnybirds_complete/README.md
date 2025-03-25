@@ -24,7 +24,7 @@ This repository contains the code to replicate the complete FunnyBirds paper. As
 For all three architectures, evaluation remains the same: You call ```evaluate_explainability.py``` with the architecture both as `--model` and `--explainer` argument. The functionality for each method is implemented in seperate classes in `explainers/explainer_wrapper.py`.
 
 ### More Evaluations
-We add code for evaluating LIME and RISE as explanation methods in `evaluate_explainability.py`. These are compatible with ResNet, VGG16, and ViT and can be used the same way as the other standard methods, for instance:
+We add code for evaluating LIME, RISE, Guided Backprop, Guided GradCAM, and DeepLIFT as explanation methods in `evaluate_explainability.py`. These are compatible with ResNet, VGG16, and ViT and can be used the same way as the other standard methods, for instance:
 ```
 DATA_DIR=/path/to/dataset/FunnyBirds/
 MODEL_PATH=/path/to/models/
