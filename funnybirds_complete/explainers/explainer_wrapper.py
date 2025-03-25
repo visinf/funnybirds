@@ -371,6 +371,30 @@ class ViTCheferLRPExplainer(AbstractAttributionExplainer):
         m = transforms.Resize((H,W), interpolation=Image.NEAREST)
         attribution = m(attribution)
         return attribution
+
+from captum.attr import GuidedBackprop
+class ViTGuidedGradCamExplainer(AbstractAttributionExplainer):
+    def __init__(self, model):
+        self.model = model
+        self.gradcam = Baselines(self.model.model)  # Grad-CAM from Baselines
+        self.guided_bp = GuidedBackprop(self.model.model)  # Guided Backprop
+
+    def explain(self, input, target):
+        B, C, H, W = input.shape
+        assert B == 1  # Single image
+
+        # Grad-CAM Attention
+        input_ = F.interpolate(input, (224, 224))  
+        cam_attn = self.gradcam.generate_cam_attn(input_, index=target).reshape(1, 1, 14, 14)
+        cam_attn = transforms.Resize((224, 224), interpolation=Image.NEAREST)(cam_attn)
+        # Guided Backpropagation
+        guided_bp = self.guided_bp.attribute(input_, target=target)
+
+        # Element-wise product of Guided BP and Grad-CAM
+        guided_gradcam = guided_bp * cam_attn
+        
+        guided_gradcam = transforms.Resize((H, W), interpolation=Image.NEAREST)(guided_gradcam)
+        return guided_gradcam
     
 from models.bagnets.utils import generate_heatmap_pytorch
 class BagNetExplainer(AbstractAttributionExplainer):

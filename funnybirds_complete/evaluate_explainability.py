@@ -15,7 +15,7 @@ from models.protopnet.ppnet import ppnetexplain
 
 from models.model_wrapper import StandardModel, ViTModel, BcosModel, ProtoPNetModel
 from evaluation_protocols import accuracy_protocol, controlled_synthetic_data_check_protocol, single_deletion_protocol, preservation_check_protocol, deletion_check_protocol, target_sensitivity_protocol, distractibility_protocol, background_independence_protocol
-from explainers.explainer_wrapper import CaptumAttributionExplainer, BcosExplainer, ProtoPNetExplainer, RiseExplainer, LimeExplainer, BagNetExplainer, ViTGradCamExplainer, ViTRolloutExplainer, ViTCheferLRPExplainer, IntegratedGradientsAbsoluteExplainer, SSMExplainer, SSMAttriblikePExplainer
+from explainers.explainer_wrapper import CaptumAttributionExplainer, BcosExplainer, ProtoPNetExplainer, RiseExplainer, LimeExplainer, BagNetExplainer, ViTGradCamExplainer, ViTRolloutExplainer, ViTCheferLRPExplainer, IntegratedGradientsAbsoluteExplainer, SSMExplainer, SSMAttriblikePExplainer, ViTGuidedGradCamExplainer
 from models.bcos.model import get_model
 from models.bcos.experiment_parameters import exps
 from models.bcos.bcosconv2d import BcosConv2d
@@ -184,6 +184,8 @@ def main():
         elif args.model == 'vgg16':
             explainer = GuidedGradCam(model, model.model.features)
             explainer = CaptumAttributionExplainer(explainer)
+        elif args.model == 'vit_b_16':
+            explainer = ViTGuidedGradCamExplainer(model)
         else:
             print('GuidedGradCAM not supported for model!')
             return
