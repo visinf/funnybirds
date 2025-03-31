@@ -198,7 +198,6 @@ class ProtoPNetExplainer(AbstractAttributionExplainer):
             prototype = plt.imread(os.path.join(self.load_img_dir, 'epoch-'+str(self.start_epoch_number), 'prototype-img'+str(prototype_index.item())+'.png'))
             prototype = cv2.cvtColor(np.uint8(255*prototype), cv2.COLOR_RGB2BGR)
             
-            h,w,c = prototype.shape
             prototype = prototype[...,::-1]
             
             prototypes.append(prototype)
