@@ -46,6 +46,26 @@
 			import { FontLoader } from './jsm/loaders/FontLoader.js';
 			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 			import { TextGeometry } from './jsm/geometries/TextGeometry.js';
+
+			window.__FUNNYBIRDS_READY__ = false;
+
+			let initFinished = false;
+			let assetsLoadedBeforeInitFinished = false;
+
+			function markRenderReady() {
+				if (!initFinished) {
+					assetsLoadedBeforeInitFinished = true;
+					return;
+				}
+
+				// Let the browser present the completed scene before Puppeteer screenshots it.
+				requestAnimationFrame( function () {
+					requestAnimationFrame( function () {
+						render();
+						window.__FUNNYBIRDS_READY__ = true;
+					} );
+				} );
+			}
 			
 			var render_mode = <%- JSON.stringify(render_mode) %>
 
@@ -243,8 +263,30 @@
 
 
 				var loader = new GLTFLoader();
+				var pendingModelLoads = 0;
+
+				function finishModelLoad() {
+					pendingModelLoads -= 1;
+					if ( pendingModelLoads === 0 ) {
+						markRenderReady();
+					}
+				}
+
+				function loadModel( url, onLoad ) {
+					pendingModelLoads += 1;
+					loader.load( url, function ( gltf ) {
+						try {
+							onLoad( gltf );
+						} finally {
+							finishModelLoad();
+						}
+					}, undefined, function ( error ) {
+						console.warn( 'Failed to load asset:', url, error );
+						finishModelLoad();
+					} );
+				}
 				var base;
-				loader.load( 'data/XAI/bird01.glb', function ( gltf ) {
+				loadModel( 'data/XAI/bird01.glb', function ( gltf ) {
 
 					base = gltf.scene//.children[ 0 ];
 
@@ -279,7 +321,7 @@
 
 				// beak
 				var part01;
-				loader.load( 'data/XAI/beak/' + beak_model, function ( gltf ) {
+				loadModel( 'data/XAI/beak/' + beak_model, function ( gltf ) {
 
 					part01 = gltf.scene;
 
@@ -330,7 +372,7 @@
 
 				// feet01
 				var part02;
-				loader.load( 'data/XAI/foot/' + foot_model, function ( gltf ) {
+				loadModel( 'data/XAI/foot/' + foot_model, function ( gltf ) {
 
 					part02 = gltf.scene//.children[ 0 ];
 
@@ -368,7 +410,7 @@
 
 				// feet02
 				var part03;
-				loader.load( 'data/XAI/foot/' + foot_model, function ( gltf ) {
+				loadModel( 'data/XAI/foot/' + foot_model, function ( gltf ) {
 
 					part03 = gltf.scene//.children[ 0 ];
 
@@ -409,7 +451,7 @@
 
 				// eye01
 				var part04;
-				loader.load( 'data/XAI/eye/' + eye_model, function ( gltf ) {
+				loadModel( 'data/XAI/eye/' + eye_model, function ( gltf ) {
 
 					part04 = gltf.scene//.children[ 0 ];
 
@@ -464,7 +506,7 @@
 
 				// eye02
 				var part05;
-				loader.load( 'data/XAI/eye/' + eye_model, function ( gltf ) {
+				loadModel( 'data/XAI/eye/' + eye_model, function ( gltf ) {
 
 					part05 = gltf.scene//.children[ 0 ];
 
@@ -520,7 +562,7 @@
 
 				// tail
 				var part06;
-				loader.load( 'data/XAI/tail/' + tail_model, function ( gltf ) {
+				loadModel( 'data/XAI/tail/' + tail_model, function ( gltf ) {
 
 					part06 = gltf.scene//.children[ 0 ];
 
@@ -560,7 +602,7 @@
 
 				// wing01
 				var part07;
-				loader.load( 'data/XAI/wing/' + wing_model, function ( gltf ) {
+				loadModel( 'data/XAI/wing/' + wing_model, function ( gltf ) {
 
 					part07 = gltf.scene//.children[ 0 ];
 
@@ -600,7 +642,7 @@
 
 				// wing01
 				var part08;
-				loader.load( 'data/XAI/wing/' + wing_model, function ( gltf ) {
+				loadModel( 'data/XAI/wing/' + wing_model, function ( gltf ) {
 
 					part08 = gltf.scene//.children[ 0 ];
 
@@ -805,6 +847,10 @@
 
 
 				
+				initFinished = true;
+				if ( assetsLoadedBeforeInitFinished ) {
+					markRenderReady();
+				}
 				
 
 			}

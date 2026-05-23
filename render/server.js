@@ -7,13 +7,16 @@ app.set('view engine', 'html');
 
 var fs = require("fs");
 const puppeteer = require('puppeteer')
+const RENDER_TIMEOUT_MS = 30_000
 
-app.get('/render', function (req, res) {
+app.get('/render', async function (req, res) {
 
     var params = '?' + req.url.split('?')[1];
     console.log(params)
-    ; (async () => {
-        const browser = await puppeteer.launch( {
+    const renderStart = Date.now()
+    let browser
+    try {
+        browser = await puppeteer.launch( {
             headless: ! process.env.VISIBLE,
             args: [
                 '--use-gl=swiftshader',
@@ -21,17 +24,27 @@ app.get('/render', function (req, res) {
                 '--enable-surface-synchronization'
             ]
         } )
-        
+
         const page = await browser.newPage()
 
         await page.setViewport({ width: 1256, height: 1256 })
-        await page.goto('http://localhost:8081/page' + params)
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        x = await page.screenshot({ path: 'my_screenshot.png' , encoding:'base64'})
-        await browser.close()
+        await page.goto('http://localhost:8081/page' + params, { waitUntil: 'domcontentloaded' })
+        await page.waitForFunction(
+            'window.__FUNNYBIRDS_READY__ === true',
+            { timeout: RENDER_TIMEOUT_MS }
+        )
+        console.log('Render time: ' + (Date.now() - renderStart) + 'ms')
+        const x = await page.screenshot({ path: 'my_screenshot.png' , encoding:'base64'})
         res.end( x );
-        
-    })()
+
+    } catch (err) {
+        console.error('Render failed:', err)
+        res.status(504).send('Render timed out before the scene was ready')
+    } finally {
+        if (browser) {
+            await browser.close()
+        }
+    }
 })
 
 app.get('/page', function (req, res) {
