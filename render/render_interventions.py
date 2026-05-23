@@ -88,12 +88,6 @@ def render_interventions(dataset_json, store_path, parts, mode):
         if not np.all(im_matrix[:,:,0] == im_matrix[0,0,0]):
           print('SAVE IMAGE')
           img.save(path_sample + '/body_' + '_'.join(sorted(keep_parts)) + '.png', 'png')
-          #clean tmp dir
-          pattern = os.path.join('/tmp', "puppeteer*")
-          for item in glob(pattern):
-            if not os.path.isdir(item):
-                continue
-            rmtree(item)
           break
 
 
@@ -133,12 +127,6 @@ def render_background_interventions(dataset_json, store_path, parts, mode):
         im_matrix = np.array(img)
         if not np.all(im_matrix[:,:,0] == im_matrix[0,0,0]):
           img.save(path_sample, 'png')
-          #clean tmp dir
-          pattern = os.path.join('/tmp', "puppeteer*")
-          for item in glob(pattern):
-            if not os.path.isdir(item):
-                continue
-            rmtree(item)
           break
 
 

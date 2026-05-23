@@ -10,14 +10,11 @@ var fs = require("fs");
 const puppeteer = require('puppeteer')
 const RENDER_TIMEOUT_MS = 30_000
 
-app.get('/render', async function (req, res) {
+let browserPromise
 
-    var params = '?' + req.url.split('?')[1];
-    console.log(params)
-    const renderStart = Date.now()
-    let browser
-    try {
-        browser = await puppeteer.launch( {
+function getBrowser() {
+    if (!browserPromise) {
+        browserPromise = puppeteer.launch( {
             headless: ! process.env.VISIBLE,
             args: [
                 '--use-gl=swiftshader',
@@ -25,8 +22,19 @@ app.get('/render', async function (req, res) {
                 '--enable-surface-synchronization'
             ]
         } )
+    }
+    return browserPromise
+}
 
-        const page = await browser.newPage()
+app.get('/render', async function (req, res) {
+
+    var params = '?' + req.url.split('?')[1];
+    console.log(params)
+    const renderStart = Date.now()
+    let page
+    try {
+        const browser = await getBrowser()
+        page = await browser.newPage()
 
         await page.setViewport({ width: 1256, height: 1256 })
         await page.goto('http://localhost:8081/page' + params, { waitUntil: 'domcontentloaded' })
@@ -42,8 +50,8 @@ app.get('/render', async function (req, res) {
         console.error('Render failed:', err)
         res.status(504).send('Render timed out before the scene was ready')
     } finally {
-        if (browser) {
-            await browser.close()
+        if (page) {
+            await page.close()
         }
     }
 })
@@ -97,5 +105,4 @@ var server = app.listen(8081, function () {
    var port = server.address().port
    console.log("Example app listening at http://%s:%s", host, port)
 })
-
 

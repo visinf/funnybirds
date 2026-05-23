@@ -173,12 +173,6 @@ def create_dataset(dataset_json, store_path, mode):
         if not os.path.exists(path):
           os.makedirs(path)
         img.save(path + '/' + str(i).zfill(6) + '.png', 'png')
-        #clean tmp dir
-        pattern = os.path.join('/tmp', "puppeteer*")
-        for item in glob(pattern):
-          if not os.path.isdir(item):
-              continue
-          rmtree(item)
         break
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
