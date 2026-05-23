@@ -4,6 +4,7 @@ app.engine('html', require('ejs').renderFile);
 app.set('views', __dirname);
 //console.log(__dirname + '/views')
 app.set('view engine', 'html');
+app.use(express.static(__dirname + '/js/three.js-master/examples'));
 
 var fs = require("fs");
 const puppeteer = require('puppeteer')
@@ -86,8 +87,6 @@ app.get('/page', function (req, res) {
 
     console.log(beak_model)
     console.log(beak_color)
-    //res.send("<html> <head>server Response</head><body><h1> This page was render direcly from the server <p>Hello there welcome to my website</p></h1></body></html>");
-    app.use(express.static(__dirname + '/js/three.js-master/examples'));
 
     res.render('./page.html', {render_mode: render_mode, camera_distance: camera_distance, camera_pitch: camera_pitch, camera_roll: camera_roll, light_distance:light_distance, light_pitch: light_pitch, light_roll: light_roll, beak_model: beak_model, beak_color: beak_color, foot_model: foot_model, eye_model: eye_model, tail_model: tail_model, tail_color:tail_color, wing_model: wing_model, wing_color: wing_color, bg_objects: bg_objects, bg_scale_x:bg_scale_x, bg_scale_y:bg_scale_y, bg_scale_z:bg_scale_z, bg_rot_x:bg_rot_x, bg_rot_y:bg_rot_y, bg_rot_z:bg_rot_z, bg_color:bg_color, bg_radius:bg_radius, bg_pitch:bg_pitch, bg_roll:bg_roll});
 })
