@@ -164,16 +164,22 @@ def json_to_image(json, mode):
 def create_dataset(dataset_json, store_path, mode):
   for i,sample_json in enumerate(dataset_json):
     print(i)
-    while True:
-      img = json_to_image(sample_json, mode)
-      # test if all values are the same
-      im_matrix = np.array(img)
-      if not np.all(im_matrix[:,:,0] == im_matrix[0,0,0]):
+    for attempt in range(10):
+      try:
+        img = json_to_image(sample_json, mode)
+        # test if all values are the same
+        im_matrix = np.array(img)
+        if np.all(im_matrix[:,:,0] == im_matrix[0,0,0]):
+          raise RuntimeError('flat render')
         path = os.path.join(store_path, str(sample_json['class_idx']))
         if not os.path.exists(path):
           os.makedirs(path)
         img.save(path + '/' + str(i).zfill(6) + '.png', 'png')
         break
+      except Exception as e:
+        print('render failed, attempt', attempt + 1, 'of 10:', e)
+        if attempt == 9:
+          raise
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('--mode', required=True,
