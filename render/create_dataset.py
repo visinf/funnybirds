@@ -38,7 +38,7 @@ def create_classes_json(nr_classes, parts):
         i += 1
   return classes
 
-def create_dataset_json(samples_per_class, classes, parts, min_bg_parts, max_bg_parts, mode):
+def create_dataset_json(samples_per_class, classes, parts, min_bg_parts, max_bg_parts, mode, disable_interventions):
   dataset = []
   for c in range(len(classes)):
     current_class = classes[c]
@@ -57,7 +57,7 @@ def create_dataset_json(samples_per_class, classes, parts, min_bg_parts, max_bg_
       
       # set parts
       part_keys = list(parts.keys())
-      if mode == 'train' or mode == 'train_part_map': # randomly remove n parts from the bird to allow interventions to be in domain
+      if not disable_interventions and (mode == 'train' or mode == 'train_part_map'): # randomly remove n parts from the bird to allow interventions to be in domain
         if random.choice([0, 1]):
           nr_delete = random.randint(0, len(part_keys))
           part_keys_keep = delete_rand_items(part_keys, nr_delete)
@@ -164,22 +164,22 @@ def json_to_image(json, mode):
 def create_dataset(dataset_json, store_path, mode):
   for i,sample_json in enumerate(dataset_json):
     print(i)
-    while True:
-      img = json_to_image(sample_json, mode)
-      # test if all values are the same
-      im_matrix = np.array(img)
-      if not np.all(im_matrix[:,:,0] == im_matrix[0,0,0]):
+    for attempt in range(10):
+      try:
+        img = json_to_image(sample_json, mode)
+        # test if all values are the same
+        im_matrix = np.array(img)
+        if np.all(im_matrix[:,:,0] == im_matrix[0,0,0]):
+          raise RuntimeError('flat render')
         path = os.path.join(store_path, str(sample_json['class_idx']))
         if not os.path.exists(path):
           os.makedirs(path)
         img.save(path + '/' + str(i).zfill(6) + '.png', 'png')
-        #clean tmp dir
-        pattern = os.path.join('/tmp', "puppeteer*")
-        for item in glob(pattern):
-          if not os.path.isdir(item):
-              continue
-          rmtree(item)
         break
+      except Exception as e:
+        print('render failed, attempt', attempt + 1, 'of 10:', e)
+        if attempt == 9:
+          raise
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('--mode', required=True,
@@ -199,6 +199,8 @@ parser.add_argument('--create_dataset_json', action='store_true',
                     help='create_datasert_json')
 parser.add_argument('--render_dataset', action='store_true',
                     help='create_datasert_json') 
+parser.add_argument('--disable_interventions', action='store_true',
+                    help='Disable train-time random part removal.')
 
 args = parser.parse_args()
 
@@ -231,7 +233,7 @@ else:
     print('classes.json loaded')
 
 if args.create_dataset_json:
-    dataset_json = create_dataset_json(args.nr_samples_per_class, classes, parts, 0, 35, args.mode)
+    dataset_json = create_dataset_json(args.nr_samples_per_class, classes, parts, 0, 35, args.mode, args.disable_interventions)
     if args.mode == 'train' or args.mode == 'test': 
         path_dataset_json = os.path.join(path, 'dataset_' + args.mode + '.json')
         with open(path_dataset_json, "w") as outfile:

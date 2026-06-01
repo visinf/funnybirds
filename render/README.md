@@ -21,8 +21,6 @@ _You can even turn the scene with a left-click and by moving the cursor._
 
 ### Front-end (rendering the dataset)
 
-> :warning: **Warning**: Puppeteer, a package we use to take screenshots of the rendered scenes, stores temporary files in /tmp that start with "puppeteer...". To avoid storing large amounts of data, we automatically delete all the puppeteer files in /tmp. If the default store location on your machine is a different one, you need to adjust the dictionary. Also, if your /tmp folder contains other puppeteer files that you would like to keep, adjust the code accordingly!
-
 To render the dataset, you have to run the above server and call the following lines in that order:
 
 ```
